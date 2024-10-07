@@ -26,7 +26,7 @@ jobs:
                 echo "vlt_bin_latest_rls: ${vlt_bin_latest_rls}"
                 echo "vlt_latest_rls: ${vlt_latest_rls}"
 
-                if "${vlt_bin_latest_rls}" = "${vlt_latest_release}"; then
+                if test "${vlt_bin_latest_rls}" = "${vlt_latest_release}"; then
                     echo "needed=false" >> ${GITHUB_OUTPUT}
                 else
                     echo "needed=true" >> ${GITHUB_OUTPUT}
