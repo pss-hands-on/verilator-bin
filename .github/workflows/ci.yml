@@ -45,9 +45,7 @@ jobs:
               run: |
                 echo "Running build"
                 ./scripts/build.sh
-
-                  - name: Create Release
-            - name: release
+            - name: Create Release
               if: ${{ steps.is_needed.outputs.needed }}
               id: create_release
               uses: actions/create-release@v1
@@ -60,6 +58,16 @@ jobs:
                   Build of Verilator ${{ steps.is_needed.outputs.vlt_latest_rls }}
                 draft: false
                 prerelease: false
+            - name: Upload Files
+              if: ${{ steps.is_needed.outputs.needed }}
+              uses: actions/upload-release-asset@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                upload_url: ${{ steps.create_release.outputs.upload_url }}
+                asset_path: ./verilator-linux.tar.gz
+                asset_name: verilator-linux.tar.gz
+                asset_content_type: application/gzip
 
 
 

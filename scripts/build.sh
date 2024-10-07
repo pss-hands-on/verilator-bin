@@ -99,4 +99,5 @@ rm -f ${release_dir}/share/verilator/bin/*_dbg
 #********************************************************************
 cd ${root}
 
-tar czf verilator-${vlt_version}.tar.gz verilator
+#tar czf verilator-linux-${vlt_version}.tar.gz verilator
+tar czf verilator-linux.tar.gz verilator
