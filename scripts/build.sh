@@ -5,7 +5,7 @@ root=$(pwd)
 if test ! -d py; then
     python3 -m venv py
     source py/bin/activate
-    pip install meson
+    pip install meson ninja
 fi
 
 vlt_latest_rls=$(curl -s -L \
