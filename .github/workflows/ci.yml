@@ -34,7 +34,7 @@ jobs:
                     echo "needed=true" >> ${GITHUB_OUTPUT}
                 fi
             - name: build
-              if: ${{ steps.is_needed.needed }}
+              if: ${{ steps.is_needed.outputs.needed }}
               run: |
                 echo "Running build"
                 ./scripts/build.sh
