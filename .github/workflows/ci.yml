@@ -33,7 +33,6 @@ jobs:
                 fi
             - name: build
               if: ${{ steps.is_needed.needed }}
-              env:
               run: |
                 echo "Running build"
                 ./scripts/build.sh
