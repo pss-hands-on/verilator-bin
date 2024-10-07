@@ -9,6 +9,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - name: check_is_needed
+              id: is_needed
               run: |
                 vlt_latest_rls=$(curl -s -L \
                     -H "Accept: application/vnd.github+json" \
@@ -26,5 +27,9 @@ jobs:
                 echo "vlt_latest_rls: ${vlt_latest_rls}"
 
                 echo "needed=false" >> ${GITHUB_OUTPUT}
+            - name: build
+              if: ${{ steps.is_needed.needed }}
+              run: |
+                echo "Running build"
 
 
