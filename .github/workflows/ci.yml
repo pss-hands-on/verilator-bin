@@ -25,6 +25,6 @@ jobs:
                 echo "vlt_bin_latest_rls: ${vlt_bin_latest_rls}"
                 echo "vlt_latest_rls: ${vlt_latest_rls}"
 
-                echo "false" >> ${GITHUB_OUTPUT}
+                echo "needed=false" >> ${GITHUB_OUTPUT}
 
 
