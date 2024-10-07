@@ -10,7 +10,7 @@ jobs:
             - uses: actions/checkout@v4
             - name: Install Deps
               run: |
-                sudo apt-get install autoconf bison flex libfl-dev
+                sudo apt-get install autoconf bison flex libfl-dev help2man
             - name: check_is_needed
               id: is_needed
               run: |
