@@ -94,3 +94,9 @@ strip *
 rm -rf ${release_dir}/lib
 rm -f ${release_dir}/share/verilator/bin/*_dbg
 
+#********************************************************************
+#* Clean-up
+#********************************************************************
+cd ${root}
+
+tar czf verilator-${vlt_version}.tar.gz verilator

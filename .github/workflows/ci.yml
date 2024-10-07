@@ -26,6 +26,8 @@ jobs:
                 echo "vlt_bin_latest_rls: ${vlt_bin_latest_rls}"
                 echo "vlt_latest_rls: ${vlt_latest_rls}"
 
+                echo "vlt_latest_rls=${vlt_latest_rls}" >> ${GITHUB_OUTPUT}
+
                 if test "${vlt_bin_latest_rls}" = "${vlt_latest_release}"; then
                     echo "needed=false"
                     echo "needed=false" >> ${GITHUB_OUTPUT}
@@ -40,5 +42,21 @@ jobs:
               run: |
                 echo "Running build"
                 ./scripts/build.sh
+
+                  - name: Create Release
+            - name: release
+              if: ${{ steps.is_needed.outputs.needed }}
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+              with:
+                tag_name: ${{ steps.is_needed.outputs.vlt_latest_rls }}
+                release_name: Release ${{ steps.is_needed.outputs.vlt_latest_rls }}
+                body: |
+                  Build of Verilator ${{ steps.is_needed.outputs.vlt_latest_rls }}
+                draft: false
+                prerelease: false
+
 
 
