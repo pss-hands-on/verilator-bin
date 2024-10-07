@@ -42,14 +42,14 @@ jobs:
                     echo "needed=true" >> ${GITHUB_OUTPUT}
                 fi
             - name: build
-              if: ${{ steps.is_needed.outputs.needed }}
+              if: ${{ steps.is_needed.outputs.needed }} == "true"
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
                 echo "Running build"
                 ./scripts/build.sh
             - name: Create Release
-              if: ${{ steps.is_needed.outputs.needed }}
+              if: ${{ steps.is_needed.outputs.needed }} == "true"
               id: create_release
               uses: actions/create-release@v1
               env:
@@ -62,7 +62,7 @@ jobs:
                 draft: false
                 prerelease: false
             - name: Upload Files
-              if: ${{ steps.is_needed.outputs.needed }}
+              if: ${{ steps.is_needed.outputs.needed }} == "true"
               uses: actions/upload-release-asset@v1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
