@@ -37,7 +37,7 @@ fi
 
 vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
 
-release_dir="${root}/verilator/${vlt_version}"
+release_dir="${root}/verilator-${vlt_version}"
 rm -rf ${release_dir}
 mkdir -p ${release_dir}
 
@@ -100,4 +100,4 @@ rm -f ${release_dir}/share/verilator/bin/*_dbg
 cd ${root}
 
 #tar czf verilator-linux-${vlt_version}.tar.gz verilator
-tar czf verilator-linux.tar.gz verilator
+tar czf verilator-ubuntu-x64-${vlt_version}.tar.gz verilator-${vlt_version}
