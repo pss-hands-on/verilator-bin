@@ -69,8 +69,8 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: ./verilator-linux.tar.gz
-                asset_name: verilator-linux.tar.gz
+                asset_path: "./verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_latest_rls }}.tar.gz"
+                asset_name: "verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_latest_rls }}.tar.gz"
                 asset_content_type: application/gzip
 
 
