@@ -73,7 +73,9 @@ fi
 tar xvzf ${vlt_latest_rls}.tar.gz
 if test $? -ne 0; then exit 1; fi
 
-cd verilator-${vlt_version}
+mv verilator-${vlt_version} verilator-src
+
+cd verilator-src
 autoconf
 if test $? -ne 0; then exit 1; fi
 ./configure --prefix=${release_dir} --with-solver='bitwuzla'
