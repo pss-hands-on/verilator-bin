@@ -89,7 +89,7 @@ if test $? -ne 0; then exit 1; fi
 ./configure --prefix=${release_dir} --with-solver='bitwuzla'
 if test $? -ne 0; then exit 1; fi
 
-make -j$(expr 2 * $(nproc))
+make -j$(nproc)
 if test $? -ne 0; then exit 1; fi
 make install
 if test $? -ne 0; then exit 1; fi
@@ -111,3 +111,4 @@ cd ${root}/release
 
 #tar czf verilator-linux-${vlt_version}.tar.gz verilator
 tar czf verilator-ubuntu-x64-${vlt_version}.tar.gz verilator-${vlt_version}
+
