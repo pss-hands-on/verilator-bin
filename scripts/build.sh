@@ -4,8 +4,13 @@ root=$(pwd)
 
 if test ! -d py; then
     python3 -m venv py
+    if test $? -ne 0; then exit 1; fi
+
     source py/bin/activate
+    if test $? -ne 0; then exit 1; fi
+
     pip install meson ninja
+    if test $? -ne 0; then exit 1; fi
 fi
 
 vlt_latest_rls=$(curl -s -L \
@@ -58,8 +63,12 @@ cd bitwuzla-${bwz_version}
 if test $? -ne 0; then exit 1; fi
 
 cd build
+
 meson compile
+if test $? -ne 0; then exit 1; fi
+
 meson install
+if test $? -ne 0; then exit 1; fi
 
 #********************************************************************
 #* Build Verilator
