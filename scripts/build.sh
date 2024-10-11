@@ -6,12 +6,11 @@ if test ! -d py; then
     python3 -m venv py
     if test $? -ne 0; then exit 1; fi
 
-    source py/bin/activate
-    if test $? -ne 0; then exit 1; fi
-
-    pip install meson ninja
+    ./py/bin/pip install meson ninja
     if test $? -ne 0; then exit 1; fi
 fi
+
+export PATH=${root}/py/bin:${PATH}
 
 vlt_latest_rls=$(curl -s -L \
   -H "Accept: application/vnd.github+json" \
