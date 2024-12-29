@@ -39,8 +39,13 @@ fi
 
 
 vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
+rls_version=${vlt_version}
 
-release_dir="${root}/release/verilator-${vlt_version}"
+if test "x${BUILD_NUM}" != "x"; then
+    rls_version="${rls_version}.${BUILD_NUM}"
+fi
+
+release_dir="${root}/release/verilator-${rls_version}"
 rm -rf ${release_dir}
 mkdir -p ${release_dir}
 
@@ -113,10 +118,7 @@ rm -f ${release_dir}/share/verilator/bin/*_dbg
 #********************************************************************
 cd ${root}/release
 
-if test "x${BUILD_NUM}" != "x"; then
-    vlt_version="${vlt_version}.${BUILD_NUM}"
-fi
 
 #tar czf verilator-linux-${vlt_version}.tar.gz verilator
-tar czf verilator-ubuntu-x64-${vlt_version}.tar.gz verilator-${vlt_version}
+tar czf verilator-ubuntu-x64-${rls_version}.tar.gz verilator-${rls_version}
 
