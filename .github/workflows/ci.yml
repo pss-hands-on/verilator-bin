@@ -49,6 +49,7 @@ jobs:
               if: ${{ steps.is_needed.outputs.needed }} == "true"
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                BUILD_NUM: ${{ github.run_id }}
               run: |
                 echo "Running build"
                 echo "needed: ${{ steps.is_needed.outputs.needed }}"
