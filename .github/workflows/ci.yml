@@ -16,6 +16,8 @@ jobs:
                 sudo apt-get install autoconf bison flex libfl-dev help2man
             - name: check_is_needed
               id: is_needed
+              env:
+                BUILD_NUM: ${{ github.run_id }}
               run: |
                 vlt_latest_rls=$(curl -s -L \
                     -H "Accept: application/vnd.github+json" \
@@ -34,7 +36,7 @@ jobs:
                 vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
 
                 echo "vlt_latest_rls=${vlt_latest_rls}" >> ${GITHUB_OUTPUT}
-                echo "vlt_version=${vlt_version}" >> ${GITHUB_OUTPUT}
+                echo "vlt_version=${vlt_version}.${BUILD_NUM}" >> ${GITHUB_OUTPUT}
 
                 if test "${vlt_bin_latest_rls}" = "${vlt_latest_rls}"; then
                     echo "needed=false"
@@ -57,6 +59,7 @@ jobs:
               uses: actions/create-release@v1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+                BUILD_NUM: ${{ github.run_id }}
               with:
                 tag_name: ${{ steps.is_needed.outputs.vlt_latest_rls }}
                 release_name: "Release ${{ steps.is_needed.outputs.vlt_latest_rls }}"
@@ -69,6 +72,7 @@ jobs:
               uses: actions/upload-release-asset@v1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                BUILD_NUM: ${{ github.run_id }}
               with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
                 asset_path: "./release/verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"

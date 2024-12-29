@@ -10,7 +10,6 @@ if test ! -d py; then
     if test $? -ne 0; then exit 1; fi
 fi
 
-export PATH=${root}/py/bin:${PATH}
 
 vlt_latest_rls=$(curl -s -L \
   -H "Accept: application/vnd.github+json" \
@@ -57,6 +56,9 @@ fi
 tar xvzf ${bwz_latest_rls}.tar.gz
 if test $? -ne 0; then exit 1; fi
 
+PATH_SAV=${PATH}
+export PATH=${root}/py/bin:${PATH}
+
 cd bitwuzla-${bwz_version}
 ./configure.py --prefix ${release_dir}
 if test $? -ne 0; then exit 1; fi
@@ -68,6 +70,8 @@ if test $? -ne 0; then exit 1; fi
 
 meson install
 if test $? -ne 0; then exit 1; fi
+
+PATH=${PATH_SAV}
 
 #********************************************************************
 #* Build Verilator
@@ -108,6 +112,10 @@ rm -f ${release_dir}/share/verilator/bin/*_dbg
 #* Clean-up
 #********************************************************************
 cd ${root}/release
+
+if test "x${BUILD_NUM}" != "x"; then
+    vit_version="${vlt_version}.${BUILD_NUM}"
+fi
 
 #tar czf verilator-linux-${vlt_version}.tar.gz verilator
 tar czf verilator-ubuntu-x64-${vlt_version}.tar.gz verilator-${vlt_version}
