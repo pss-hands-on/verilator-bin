@@ -61,8 +61,8 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
                 BUILD_NUM: ${{ github.run_id }}
               with:
-                tag_name: ${{ steps.is_needed.outputs.vlt_latest_rls }}
-                release_name: "Release ${{ steps.is_needed.outputs.vlt_latest_rls }}"
+                tag_name: "${{ steps.is_needed.outputs.vlt_latest_rls }}.${{ github.run_id }}"
+                release_name: "Release ${{ steps.is_needed.outputs.vlt_latest_rls }}.${{ github.run_id }}"
                 body: |
                   Build of Verilator ${{ steps.is_needed.outputs.vlt_latest_rls }}
                 draft: false
