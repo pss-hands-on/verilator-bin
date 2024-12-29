@@ -114,7 +114,7 @@ rm -f ${release_dir}/share/verilator/bin/*_dbg
 cd ${root}/release
 
 if test "x${BUILD_NUM}" != "x"; then
-    vit_version="${vlt_version}.${BUILD_NUM}"
+    vlt_version="${vlt_version}.${BUILD_NUM}"
 fi
 
 #tar czf verilator-linux-${vlt_version}.tar.gz verilator
