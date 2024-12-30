@@ -1,7 +1,12 @@
 #!/bin/sh -x
 
 root=$(pwd)
+PATH_SAV=${PATH}
 
+yum update -y
+yum install -y glibc-static
+
+export PATH=/opt/python/cp312-cp312/bin:$PATH
 if test ! -d py; then
     python3 -m venv py
     if test $? -ne 0; then exit 1; fi
@@ -61,7 +66,6 @@ fi
 tar xvzf ${bwz_latest_rls}.tar.gz
 if test $? -ne 0; then exit 1; fi
 
-PATH_SAV=${PATH}
 export PATH=${root}/py/bin:${PATH}
 
 cd bitwuzla-${bwz_version}
