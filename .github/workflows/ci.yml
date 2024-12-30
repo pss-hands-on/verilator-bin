@@ -63,6 +63,8 @@ jobs:
                 docker run --rm
                 --volume "$(pwd):/io"
                 --env BUILD_NUM
+                --env vlt_latest_rls
+                --env bwz_latest_rls
                 --workdir /io
                 quay.io/pypa/manylinux2014_x86_64
                 /io/scripts/build.sh
