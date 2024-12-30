@@ -80,7 +80,7 @@ if test $? -ne 0; then exit 1; fi
 meson install
 if test $? -ne 0; then exit 1; fi
 
-PATH=${PATH_SAV}
+# PATH=${PATH_SAV}
 
 #********************************************************************
 #* Build Verilator
