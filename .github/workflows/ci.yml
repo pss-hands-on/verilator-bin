@@ -50,10 +50,13 @@ jobs:
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 BUILD_NUM: ${{ github.run_id }}
-              run: |
-                echo "Running build"
-                echo "needed: ${{ steps.is_needed.outputs.needed }}"
-                ./scripts/build.sh
+              run: >
+                docker run --rm
+                --volume "$(pwd):/io"
+                --env BUILD_NUM
+                --workdir /io
+                quay.io/pypa/manylinux2014_x86_64
+                /io/scripts/build.sh
             - name: Create Release
               if: ${{ steps.is_needed.outputs.needed }} == "true"
               id: create_release
