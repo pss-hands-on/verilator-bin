@@ -4,7 +4,7 @@ root=$(pwd)
 PATH_SAV=${PATH}
 
 yum update -y
-yum install -y glibc-static
+yum install -y glibc-static wget flex bison
 
 export PATH=/opt/python/cp312-cp312/bin:$PATH
 if test ! -d py; then
