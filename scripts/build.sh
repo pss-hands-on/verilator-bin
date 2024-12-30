@@ -117,6 +117,9 @@ strip *
 rm -rf ${release_dir}/lib
 rm -f ${release_dir}/share/verilator/bin/*_dbg
 
+sed -i ${release_dir}/share/verilator/include/verilated.mk \
+  -e 's%PYTHON3 =.*$%PYTHON3 = python3%g'
+
 #********************************************************************
 #* Clean-up
 #********************************************************************
