@@ -74,6 +74,36 @@ jobs:
                 asset_path: "./verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
                 asset_name: "verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
                 asset_content_type: application/gzip
+    ci-windows:
+        runs-on: windows-latest
+        steps:
+            - uses: msys2/setup-msys2@v2
+                update: true
+                install: >-
+                    gcc
+                    flex
+                    bison
+                    autotools
+                    help2man
+                    python3
+            - uses: actions/checkout@v4
+            - name: Download source
+              shell: msys2 {0}
+              run: |
+                cwd=$(pwd)
+                inst=$cwd/verilator-windows-64
+                ./scripts/build.sh
+                wget https://github.com/verilator/verilator/archive/refs/tags/v5.030.tar.gz
+                tar xvf v5.030.tar.gz
+                cd verilator-5.030
+                autoconf
+                ./configure --prefix=$inst
+                make -j$(nproc)
+                make install
+                cd $cwd
+                cp -r $inst/share/verilator/include $inst
+                cp $inst/share/verilator/bin/verilator_includer $inst/bin
+
 
 
 

@@ -2,27 +2,34 @@
 
 root=$(pwd)
 
+bwz_latest_rls="0.6.0"
+vlt_latest_rls="v5.030"
+
 if test ! -d py; then
     python3 -m venv py
     source py/bin/activate
     pip install meson ninja
 fi
 
-vlt_latest_rls=$(curl -s -L \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/verilator/verilator/git/refs/tags | \
-  jq ".[].ref" | sed -e's%refs/tags/%%' -e 's/\"//g'| sort | tail -n 1)
-if test $? -ne 0; then exit 1; fi
+if test "${vlt_latest_rls}" = "probe"; then
+  vlt_latest_rls=$(curl -s -L \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    https://api.github.com/repos/verilator/verilator/git/refs/tags | \
+    jq ".[].ref" | sed -e's%refs/tags/%%' -e 's/\"//g'| sort | tail -n 1)
+  if test $? -ne 0; then exit 1; fi
+fi
 
-bwz_latest_rls=$(curl -s -L \
-  -H "Accept: application/vnd.github+json" \
-  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
-  jq ".tag_name" | sed -e 's/\"//g')
-if test $? -ne 0; then exit 1; fi
+if test "${bwz_latest_rls}" = "probe"; then
+  bwz_latest_rls=$(curl -s -L \
+    -H "Accept: application/vnd.github+json" \
+    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
+    jq ".tag_name" | sed -e 's/\"//g')
+  if test $? -ne 0; then exit 1; fi
+fi
 
 if test ! -f ${vlt_latest_rls}.tar.gz; then
     wget https://github.com/verilator/verilator/archive/refs/tags/${vlt_latest_rls}.tar.gz
