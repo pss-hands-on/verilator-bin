@@ -16,7 +16,15 @@ jobs:
                 sudo apt-get install autoconf bison flex libfl-dev help2man
             - name: check_is_needed
               id: is_needed
+              env:
+                BUILD_NUM: ${{ github.run_id }}
               run: |
+                bwz_latest_rls=$(curl -s -L \
+                    -H "Accept: application/vnd.github+json" \
+                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                    -H "X-GitHub-Api-Version: 2022-11-28" \
+                    https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
+                    jq ".tag_name" | sed -e 's/\"//g')
                 vlt_latest_rls=$(curl -s -L \
                     -H "Accept: application/vnd.github+json" \
                     -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -29,12 +37,14 @@ jobs:
                     -H "X-GitHub-Api-Version: 2022-11-28" \
                     https://api.github.com/repos/pss-hands-on/verilator-bin/releases/latest | \
                     jq ".tag_name" | sed -e 's/\"//g')
+                echo "bwz_latest_rls: ${bwz_latest_rls}"
                 echo "vlt_bin_latest_rls: ${vlt_bin_latest_rls}"
                 echo "vlt_latest_rls: ${vlt_latest_rls}"
                 vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
 
+                echo "bwz_latest_rls=${bwz_latest_rls}" >> ${GITHUB_OUTPUT}
                 echo "vlt_latest_rls=${vlt_latest_rls}" >> ${GITHUB_OUTPUT}
-                echo "vlt_version=${vlt_version}" >> ${GITHUB_OUTPUT}
+                echo "vlt_version=${vlt_version}.${BUILD_NUM}" >> ${GITHUB_OUTPUT}
 
                 if test "${vlt_bin_latest_rls}" = "${vlt_latest_rls}"; then
                     echo "needed=false"
@@ -47,19 +57,28 @@ jobs:
               if: ${{ steps.is_needed.outputs.needed }} == "true"
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: |
-                echo "Running build"
-                echo "needed: ${{ steps.is_needed.outputs.needed }}"
-                ./scripts/build.sh
+                BUILD_NUM: ${{ github.run_id }}
+                bwz_latest_rls: ${{ steps.is_needed.outputs.bwz_latest_rls }}
+                vlt_latest_rls: ${{ steps.is_needed.outputs.vlt_latest_rls }}
+              run: >
+                docker run --rm
+                --volume "$(pwd):/io"
+                --env BUILD_NUM
+                --env vlt_latest_rls
+                --env bwz_latest_rls
+                --workdir /io
+                quay.io/pypa/manylinux2014_x86_64
+                /io/scripts/build.sh
             - name: Create Release
               if: ${{ steps.is_needed.outputs.needed }} == "true"
               id: create_release
               uses: actions/create-release@v1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+                BUILD_NUM: ${{ github.run_id }}
               with:
-                tag_name: ${{ steps.is_needed.outputs.vlt_latest_rls }}
-                release_name: "Release ${{ steps.is_needed.outputs.vlt_latest_rls }}"
+                tag_name: "${{ steps.is_needed.outputs.vlt_latest_rls }}.${{ github.run_id }}"
+                release_name: "Release ${{ steps.is_needed.outputs.vlt_latest_rls }}.${{ github.run_id }}"
                 body: |
                   Build of Verilator ${{ steps.is_needed.outputs.vlt_latest_rls }}
                 draft: false
@@ -69,9 +88,10 @@ jobs:
               uses: actions/upload-release-asset@v1
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                BUILD_NUM: ${{ github.run_id }}
               with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: "./verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
+                asset_path: "./release/verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
                 asset_name: "verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
                 asset_content_type: application/gzip
     ci-windows:

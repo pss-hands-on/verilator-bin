@@ -1,35 +1,40 @@
 #!/bin/sh -x
 
 root=$(pwd)
+PATH_SAV=${PATH}
 
-bwz_latest_rls="0.6.0"
-vlt_latest_rls="v5.030"
-
+if test $(uname -a) = "Linux"; then
+    yum update -y
+    yum install -y glibc-static wget flex bison jq
+    export PATH=/opt/python/cp312-cp312/bin:$PATH
+    rls_plat="manylinux-x64"
+elif test $(uname -a) = "Windows"; then
+    rls_plat="windows-x64"
+fi
 if test ! -d py; then
     python3 -m venv py
-    source py/bin/activate
-    pip install meson ninja
+    if test $? -ne 0; then exit 1; fi
+
+    ./py/bin/pip install meson ninja
+    if test $? -ne 0; then exit 1; fi
 fi
 
-if test "${vlt_latest_rls}" = "probe"; then
-  vlt_latest_rls=$(curl -s -L \
-    -H "Accept: application/vnd.github+json" \
-    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    https://api.github.com/repos/verilator/verilator/git/refs/tags | \
-    jq ".[].ref" | sed -e's%refs/tags/%%' -e 's/\"//g'| sort | tail -n 1)
-  if test $? -ne 0; then exit 1; fi
-fi
 
-if test "${bwz_latest_rls}" = "probe"; then
-  bwz_latest_rls=$(curl -s -L \
-    -H "Accept: application/vnd.github+json" \
-    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-    -H "X-GitHub-Api-Version: 2022-11-28" \
-    https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
-    jq ".tag_name" | sed -e 's/\"//g')
-  if test $? -ne 0; then exit 1; fi
-fi
+#vlt_latest_rls=$(curl -s -L \
+#  -H "Accept: application/vnd.github+json" \
+#  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+#  -H "X-GitHub-Api-Version: 2022-11-28" \
+#  https://api.github.com/repos/verilator/verilator/git/refs/tags | \
+#  jq ".[].ref" | sed -e 's%refs/tags/%%' -e 's/\"//g'| sort | tail -n 1)
+#if test $? -ne 0; then exit 1; fi
+
+#bwz_latest_rls=$(curl -s -L \
+#  -H "Accept: application/vnd.github+json" \
+#  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+#  -H "X-GitHub-Api-Version: 2022-11-28" \
+#  https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
+#  jq ".tag_name" | sed -e 's/\"//g')
+#if test $? -ne 0; then exit 1; fi
 
 if test ! -f ${vlt_latest_rls}.tar.gz; then
     wget https://github.com/verilator/verilator/archive/refs/tags/${vlt_latest_rls}.tar.gz
@@ -43,8 +48,13 @@ fi
 
 
 vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
+rls_version=${vlt_version}
 
-release_dir="${root}/verilator-${vlt_version}"
+if test "x${BUILD_NUM}" != "x"; then
+    rls_version="${rls_version}.${BUILD_NUM}"
+fi
+
+release_dir="${root}/release/verilator-${rls_version}"
 rm -rf ${release_dir}
 mkdir -p ${release_dir}
 
@@ -60,13 +70,21 @@ fi
 tar xvzf ${bwz_latest_rls}.tar.gz
 if test $? -ne 0; then exit 1; fi
 
+export PATH=${root}/py/bin:${PATH}
+
 cd bitwuzla-${bwz_version}
 ./configure.py --prefix ${release_dir}
 if test $? -ne 0; then exit 1; fi
 
 cd build
+
 meson compile
+if test $? -ne 0; then exit 1; fi
+
 meson install
+if test $? -ne 0; then exit 1; fi
+
+# PATH=${PATH_SAV}
 
 #********************************************************************
 #* Build Verilator
@@ -103,10 +121,15 @@ strip *
 rm -rf ${release_dir}/lib
 rm -f ${release_dir}/share/verilator/bin/*_dbg
 
+sed -i ${release_dir}/share/verilator/include/verilated.mk \
+  -e 's%PYTHON3 =.*$%PYTHON3 = python3%g'
+
 #********************************************************************
 #* Clean-up
 #********************************************************************
-cd ${root}
+cd ${root}/release
+
 
 #tar czf verilator-linux-${vlt_version}.tar.gz verilator
-tar czf verilator-ubuntu-x64-${vlt_version}.tar.gz verilator-${vlt_version}
+tar czf verilator-${rls_plat}-${rls_version}.tar.gz verilator-${rls_version}
+
