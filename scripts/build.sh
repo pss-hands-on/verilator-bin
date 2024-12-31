@@ -3,12 +3,12 @@
 root=$(pwd)
 PATH_SAV=${PATH}
 
-if test $(uname -a) = "Linux"; then
+if test $(uname -s) = "Linux"; then
     yum update -y
     yum install -y glibc-static wget flex bison jq
     export PATH=/opt/python/cp312-cp312/bin:$PATH
     rls_plat="manylinux-x64"
-elif test $(uname -a) = "Windows"; then
+elif test $(uname -s) = "Windows"; then
     rls_plat="windows-x64"
 fi
 if test ! -d py; then
