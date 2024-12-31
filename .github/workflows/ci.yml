@@ -98,8 +98,8 @@ jobs:
         runs-on: windows-latest
         steps:
             - uses: msys2/setup-msys2@v2
-                update: true
-                install: >-
+              update: true
+              install: >-
                     gcc
                     flex
                     bison
