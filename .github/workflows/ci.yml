@@ -91,8 +91,8 @@ jobs:
                 BUILD_NUM: ${{ github.run_id }}
               with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: "./release/verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
-                asset_name: "verilator-ubuntu-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
+                asset_path: "./release/verilator-manylinux-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
+                asset_name: "verilator-manylinux-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
                 asset_content_type: application/gzip
     # ci-windows:
     #     runs-on: windows-latest
