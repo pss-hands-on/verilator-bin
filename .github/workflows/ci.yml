@@ -70,6 +70,7 @@ jobs:
                 --env BUILD_NUM
                 --env vlt_latest_rls
                 --env bwz_latest_rls
+                --env image
                 --workdir /io
                 quay.io/pypa/${{ matrix.image }}
                 /io/scripts/build.sh
