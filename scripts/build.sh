@@ -3,14 +3,20 @@
 root=$(pwd)
 PATH_SAV=${PATH}
 
+
 if test $(uname -s) = "Linux"; then
     yum update -y
     yum install -y glibc-static wget flex bison jq help2man
+
+    if test -z $image; then
+        image=linux
+    fi
     export PATH=/opt/python/cp312-cp312/bin:$PATH
-    rls_plat="manylinux-x64"
+    rls_plat=${image}
 elif test $(uname -s) = "Windows"; then
     rls_plat="windows-x64"
 fi
+
 if test ! -d py; then
     python3 -m venv py
     if test $? -ne 0; then exit 1; fi

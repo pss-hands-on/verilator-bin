@@ -9,6 +9,9 @@ on:
 jobs:
     ci-linux:
         runs-on: 'ubuntu-latest'
+        strategy:
+          matrix:
+            image: [manylinux_2_24_x86_64, manylinux_2_28_x86_64, manylinux_2_34_x86_64]
         steps:
             - uses: actions/checkout@v4
             - name: Install Deps
@@ -60,6 +63,7 @@ jobs:
                 BUILD_NUM: ${{ github.run_id }}
                 bwz_latest_rls: ${{ steps.is_needed.outputs.bwz_latest_rls }}
                 vlt_latest_rls: ${{ steps.is_needed.outputs.vlt_latest_rls }}
+                image: ${{ matrix.image }}
               run: >
                 docker run --rm
                 --volume "$(pwd):/io"
@@ -67,7 +71,7 @@ jobs:
                 --env vlt_latest_rls
                 --env bwz_latest_rls
                 --workdir /io
-                quay.io/pypa/manylinux2014_x86_64
+                quay.io/pypa/${{ matrix.image }}
                 /io/scripts/build.sh
             - name: Create Release
               if: ${{ steps.is_needed.outputs.needed }} == "true"
@@ -91,8 +95,8 @@ jobs:
                 BUILD_NUM: ${{ github.run_id }}
               with:
                 upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: "./release/verilator-manylinux-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
-                asset_name: "verilator-manylinux-x64-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
+                asset_path: "./release/verilator-${{ matrix.image }}-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
+                asset_name: "verilator-${{ matrix.image }}-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
                 asset_content_type: application/gzip
     # ci-windows:
     #     runs-on: windows-latest
