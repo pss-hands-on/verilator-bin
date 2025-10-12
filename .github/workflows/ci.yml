@@ -46,6 +46,12 @@ jobs:
 
             vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
             rls_version="${vlt_version}.${{ github.run_id }}"
+        - name: print
+          run: |
+            echo "bwz_latest_rls: ${{ steps.check.bwz_latest_rls }}"
+            echo "vlt_latest_rls: ${{ steps.check.vlt_latest_rls }}"
+            echo "rls_version: ${{ steps.check.rls_version }}"
+
 
     build:
         runs-on: 'ubuntu-latest'
@@ -57,9 +63,9 @@ jobs:
 #          binaries: ${{ steps.collect_results}}
         steps:
             - uses: actions/checkout@v4
-            - name: Install Deps
-              run: |
-                sudo apt-get install autoconf bison flex libfl-dev help2man
+#            - name: Install Deps
+#              run: |
+#                sudo apt-get install autoconf bison flex libfl-dev help2man
             - name: print
               run: |
                 echo "print"
