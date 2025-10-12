@@ -56,7 +56,8 @@ if test -z ${rls_version}; then
     fi
 fi
 
-release_dir="${root}/release/verilator-${rls_version}"
+#release_dir="${root}/release/verilator-${rls_version}"
+release_dir="${root}/release/verilator"
 rm -rf ${release_dir}
 mkdir -p ${release_dir}
 
@@ -133,5 +134,5 @@ cd ${root}/release
 
 
 #tar czf verilator-linux-${vlt_version}.tar.gz verilator
-tar czf verilator-${rls_plat}-${rls_version}.tar.gz verilator-${rls_version}
+tar czf verilator-${rls_plat}-${rls_version}.tar.gz verilator
 
