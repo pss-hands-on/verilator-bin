@@ -7,63 +7,66 @@ on:
     - cron: "0 12 * * 0"
 
 jobs:
-    ci-linux:
+    version-check:
+        runs-on: 'unbuntu-latest'
+        outputs:
+            bwz_latest_rls: ${{ steps.check.bwz_latest_rls }}
+            vlt_latest_rls: ${{ steps.check.vlt_latest_rls }}
+            rls_version: ${{ steps.check.rls_version }}
+        steps:
+        - name: check
+          run: |
+            bwz_latest_rls=$(curl -s -L \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
+                jq ".tag_name" | sed -e 's/\"//g')
+            vlt_latest_rls=$(curl -s -L \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/verilator/verilator/git/refs/tags | \
+                jq ".[].ref" | sed -e's%refs/tags/%%' -e 's/\"//g'| sort | tail -n 1)
+            vlt_bin_latest_rls=$(curl -s -L \
+                -H "Accept: application/vnd.github+json" \
+                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+                -H "X-GitHub-Api-Version: 2022-11-28" \
+                https://api.github.com/repos/pss-hands-on/verilator-bin/releases/latest | \
+                jq ".tag_name" | sed -e 's/\"//g')
+            
+            echo "bwz_latest_rls: ${bwz_latest_rls}"
+            echo "vlt_bin_latest_rls: ${vlt_bin_latest_rls}"
+            echo "vlt_latest_rls: ${vlt_latest_rls}"
+            vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
+
+            echo "bwz_latest_rls=${bwz_latest_rls}" >> ${GITHUB_OUTPUT}
+            echo "vlt_latest_rls=${vlt_latest_rls}" >> ${GITHUB_OUTPUT}
+            echo "vlt_version=${vlt_version}.${BUILD_NUM}" >> ${GITHUB_OUTPUT}
+
+            vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
+            rls_version="${vlt_version}.${{ github.run_id }}"
+
+    build:
         runs-on: 'ubuntu-latest'
+        needs: version-check
         strategy:
           matrix:
             image: [manylinux2014_x86_64, manylinux_2_28_x86_64, manylinux_2_34_x86_64]
+#        outputs:
+#          binaries: ${{ steps.collect_results}}
         steps:
             - uses: actions/checkout@v4
             - name: Install Deps
               run: |
                 sudo apt-get install autoconf bison flex libfl-dev help2man
-            - name: check_is_needed
-              id: is_needed
-              env:
-                BUILD_NUM: ${{ github.run_id }}
-              run: |
-                bwz_latest_rls=$(curl -s -L \
-                    -H "Accept: application/vnd.github+json" \
-                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "X-GitHub-Api-Version: 2022-11-28" \
-                    https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
-                    jq ".tag_name" | sed -e 's/\"//g')
-                vlt_latest_rls=$(curl -s -L \
-                    -H "Accept: application/vnd.github+json" \
-                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "X-GitHub-Api-Version: 2022-11-28" \
-                    https://api.github.com/repos/verilator/verilator/git/refs/tags | \
-                    jq ".[].ref" | sed -e's%refs/tags/%%' -e 's/\"//g'| sort | tail -n 1)
-                vlt_bin_latest_rls=$(curl -s -L \
-                    -H "Accept: application/vnd.github+json" \
-                    -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                    -H "X-GitHub-Api-Version: 2022-11-28" \
-                    https://api.github.com/repos/pss-hands-on/verilator-bin/releases/latest | \
-                    jq ".tag_name" | sed -e 's/\"//g')
-                echo "bwz_latest_rls: ${bwz_latest_rls}"
-                echo "vlt_bin_latest_rls: ${vlt_bin_latest_rls}"
-                echo "vlt_latest_rls: ${vlt_latest_rls}"
-                vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
-
-                echo "bwz_latest_rls=${bwz_latest_rls}" >> ${GITHUB_OUTPUT}
-                echo "vlt_latest_rls=${vlt_latest_rls}" >> ${GITHUB_OUTPUT}
-                echo "vlt_version=${vlt_version}.${BUILD_NUM}" >> ${GITHUB_OUTPUT}
-
-                if test "${vlt_bin_latest_rls}" = "${vlt_latest_rls}"; then
-                    echo "needed=false"
-                    echo "needed=false" >> ${GITHUB_OUTPUT}
-                else
-                    echo "needed=true"
-                    echo "needed=true" >> ${GITHUB_OUTPUT}
-                fi
             - name: build
-              if: ${{ steps.is_needed.outputs.needed }} == "true"
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                 BUILD_NUM: ${{ github.run_id }}
-                bwz_latest_rls: ${{ steps.is_needed.outputs.bwz_latest_rls }}
-                vlt_latest_rls: ${{ steps.is_needed.outputs.vlt_latest_rls }}
                 image: ${{ matrix.image }}
+                bwz_latest_rls: ${{ needs.version-check.outputs.bwz_latest_rls }}
+                vlt_latest_rls: ${{ needs.version-check.outputs.vlt_latest_rls }}
               run: >
                 docker run --rm
                 --volume "$(pwd):/io"
@@ -74,31 +77,40 @@ jobs:
                 --workdir /io
                 quay.io/pypa/${{ matrix.image }}
                 /io/scripts/build.sh
-            - name: Create Release
-              if: ${{ steps.is_needed.outputs.needed }} == "true"
-              id: create_release
-              uses: actions/create-release@v1
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
-                BUILD_NUM: ${{ github.run_id }}
+            - name: upload
+              uses: actions/upload-artifact@v4
               with:
-                tag_name: "${{ steps.is_needed.outputs.vlt_latest_rls }}.${{ github.run_id }}"
-                release_name: "Release ${{ steps.is_needed.outputs.vlt_latest_rls }}.${{ github.run_id }}"
-                body: |
-                  Build of Verilator ${{ steps.is_needed.outputs.vlt_latest_rls }}
-                draft: false
-                prerelease: false
-            - name: Upload Files
-              if: ${{ steps.is_needed.outputs.needed }} == "true"
-              uses: actions/upload-release-asset@v1
-              env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                BUILD_NUM: ${{ github.run_id }}
-              with:
-                upload_url: ${{ steps.create_release.outputs.upload_url }}
-                asset_path: "./release/verilator-${{ matrix.image }}-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
-                asset_name: "verilator-${{ matrix.image }}-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
-                asset_content_type: application/gzip
+                name: my-build-artifact
+                path: "verilator-${{ matrix.image }}-${{ needs.version-check.outputs.vlt_kbuild/output/
+                retention-days: 7
+
+    publish:
+        runs-on: 'ubuntu-latest'
+        needs: build
+        steps:
+        - name: Create Release
+          id: create_release
+          uses: actions/create-release@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          with:
+            tag_name: "${{ steps.is_needed.outputs.vlt_latest_rls }}.${{ github.run_id }}"
+            release_name: "Release ${{ steps.is_needed.outputs.vlt_latest_rls }}.${{ github.run_id }}"
+            body: |
+              Build of Verilator ${{ steps.is_needed.outputs.vlt_latest_rls }}
+            draft: false
+            prerelease: false
+        - name: Upload Files
+          uses: actions/upload-release-asset@v1
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            BUILD_NUM: ${{ github.run_id }}
+          with:
+            upload_url: ${{ steps.create_release.outputs.upload_url }}
+            asset_path: "./release/verilator-${{ matrix.image }}-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
+            asset_name: "verilator-${{ matrix.immage }}-${{ steps.is_needed.outputs.vlt_version }}.tar.gz"
+            asset_content_type: application/gzip
+
     # ci-windows:
     #     runs-on: windows-latest
     #     steps:

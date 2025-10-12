@@ -25,23 +25,6 @@ if test ! -d py; then
     if test $? -ne 0; then exit 1; fi
 fi
 
-
-#vlt_latest_rls=$(curl -s -L \
-#  -H "Accept: application/vnd.github+json" \
-#  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-#  -H "X-GitHub-Api-Version: 2022-11-28" \
-#  https://api.github.com/repos/verilator/verilator/git/refs/tags | \
-#  jq ".[].ref" | sed -e 's%refs/tags/%%' -e 's/\"//g'| sort | tail -n 1)
-#if test $? -ne 0; then exit 1; fi
-
-#bwz_latest_rls=$(curl -s -L \
-#  -H "Accept: application/vnd.github+json" \
-#  -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-#  -H "X-GitHub-Api-Version: 2022-11-28" \
-#  https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
-#  jq ".tag_name" | sed -e 's/\"//g')
-#if test $? -ne 0; then exit 1; fi
-
 if test ! -f ${vlt_latest_rls}.tar.gz; then
     wget https://github.com/verilator/verilator/archive/refs/tags/${vlt_latest_rls}.tar.gz
     if test $? -ne 0; then exit 1; fi
@@ -52,12 +35,13 @@ if test ! -f ${bwz_latest_rls}.tar.gz; then
     if test $? -ne 0; then exit 1; fi
 fi
 
+if test -z ${rls_version}; then
+    vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
+    rls_version=${vlt_version}
 
-vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
-rls_version=${vlt_version}
-
-if test "x${BUILD_NUM}" != "x"; then
-    rls_version="${rls_version}.${BUILD_NUM}"
+    if test "x${BUILD_NUM}" != "x"; then
+        rls_version="${rls_version}.${BUILD_NUM}"
+    fi
 fi
 
 release_dir="${root}/release/verilator-${rls_version}"
