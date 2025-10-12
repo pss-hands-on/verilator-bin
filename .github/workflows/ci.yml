@@ -8,7 +8,7 @@ on:
 
 jobs:
     version-check:
-        runs-on: 'unbuntu-latest'
+        runs-on: 'ubuntu-latest'
         outputs:
             bwz_latest_rls: ${{ steps.check.bwz_latest_rls }}
             vlt_latest_rls: ${{ steps.check.vlt_latest_rls }}
