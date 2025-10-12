@@ -60,6 +60,12 @@ jobs:
             - name: Install Deps
               run: |
                 sudo apt-get install autoconf bison flex libfl-dev help2man
+            - name: print
+              run: |
+                echo "print"
+                echo "image: ${{ matrix.image }}"
+                echo "bwz_latest_rls: ${{ needs.version-check.outputs.bwz_latest_rls }}"
+                echo "vlt_latest_rls: ${{ needs.version-check.outputs.vlt_latest_rls }}"
             - name: build
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
