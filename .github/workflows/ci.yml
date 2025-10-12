@@ -10,9 +10,9 @@ jobs:
     version-check:
         runs-on: 'ubuntu-latest'
         outputs:
-            bwz_latest_rls: ${{ steps.check.bwz_latest_rls }}
-            vlt_latest_rls: ${{ steps.check.vlt_latest_rls }}
-            rls_version: ${{ steps.check.rls_version }}
+            bwz_latest_rls: ${{ steps.check.outputs.bwz_latest_rls }}
+            vlt_latest_rls: ${{ steps.check.outputs.vlt_latest_rls }}
+            rls_version: ${{ steps.check.outputs.rls_version }}
         steps:
         - name: fetch-version
           id: check
@@ -55,9 +55,9 @@ jobs:
             cat ${GITHUB_OUTPUT}
         - name: print
           run: |
-            echo "bwz_latest_rls: ${{ steps.check.bwz_latest_rls }}"
-            echo "vlt_latest_rls: ${{ steps.check.vlt_latest_rls }}"
-            echo "rls_version: ${{ steps.check.rls_version }}"
+            echo "bwz_latest_rls: ${{ steps.check.outputs.bwz_latest_rls }}"
+            echo "vlt_latest_rls: ${{ steps.check.outputs.vlt_latest_rls }}"
+            echo "rls_version: ${{ steps.check.outputs.rls_version }}"
 
 
     build:
