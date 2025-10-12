@@ -81,7 +81,7 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                 name: my-build-artifact
-                path: "verilator-${{ matrix.image }}-${{ needs.version-check.outputs.vlt_kbuild/output/
+                path: "verilator-${{ matrix.image }}-${{ needs.version-check.outputs.vlt_latest_rls }}"
                 retention-days: 7
 
     publish:
