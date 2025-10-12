@@ -14,7 +14,7 @@ jobs:
             vlt_latest_rls: ${{ steps.check.vlt_latest_rls }}
             rls_version: ${{ steps.check.rls_version }}
         steps:
-        - name: check
+        - name: fetch-version
           id: check
           run: |
             bwz_latest_rls=$(curl -s -L \
@@ -41,14 +41,18 @@ jobs:
             echo "vlt_latest_rls: ${vlt_latest_rls}"
             vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
 
-            set -x
+            #set -x
 
             echo "bwz_latest_rls=${bwz_latest_rls}" >> ${GITHUB_OUTPUT}
             echo "vlt_latest_rls=${vlt_latest_rls}" >> ${GITHUB_OUTPUT}
             echo "vlt_version=${vlt_version}.${BUILD_NUM}" >> ${GITHUB_OUTPUT}
 
+
             vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
             rls_version="${vlt_version}.${{ github.run_id }}"
+            echo "rls_version=${rls_version}" >> ${GITHUB_OUTPUT}
+
+            cat ${GITHUB_OUTPUT}
         - name: print
           run: |
             echo "bwz_latest_rls: ${{ steps.check.bwz_latest_rls }}"
