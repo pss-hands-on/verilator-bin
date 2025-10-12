@@ -17,6 +17,18 @@ elif test $(uname -s) = "Windows"; then
     rls_plat="windows-x64"
 fi
 
+if test -z $vlt_latest_rls; then
+  echo "vlt_latest_rls not set"
+  env
+  exit 1
+fi
+
+if test -z $bwz_latest_rls; then
+  echo "bwz_latest_rls not set"
+  env
+  exit 1
+fi
+
 if test ! -d py; then
     python3 -m venv py
     if test $? -ne 0; then exit 1; fi
