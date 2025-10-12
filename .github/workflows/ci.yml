@@ -15,6 +15,7 @@ jobs:
             rls_version: ${{ steps.check.rls_version }}
         steps:
         - name: check
+          id: check
           run: |
             bwz_latest_rls=$(curl -s -L \
                 -H "Accept: application/vnd.github+json" \
