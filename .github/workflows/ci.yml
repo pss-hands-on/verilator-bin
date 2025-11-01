@@ -96,11 +96,12 @@ jobs:
                 --workdir /io
                 quay.io/pypa/${{ matrix.image }}
                 /io/scripts/build.sh
-            - name: upload
+            - name: upload artifact
               uses: actions/upload-artifact@v4
               with:
-                name: my-build-artifact
-                path: "release/verilator-${{ matrix.image }}-${{ needs.version-check.outputs.vlt_latest_rls }}.tar.gz"
+                name: "verilator-${{ matrix.image }}"
+                path: "release/verilator-${{ matrix.image }}-*.tar.gz"
+                if-no-files-found: error
                 retention-days: 7
 
     publish:
@@ -126,6 +127,7 @@ jobs:
         - name: Download build artifacts
           uses: actions/download-artifact@v4
           with:
+            pattern: "verilator-*"
             path: release
             merge-multiple: true
 
