@@ -46,6 +46,7 @@ if test $build_rls == "true"; then
 else
     git clone https://github.com/verilator/verilator.git
     if test $? -ne 0; then exit 1; fi
+fi
 
 if test ! -f ${bwz_latest_rls}.tar.gz; then
     wget https://github.com/bitwuzla/bitwuzla/archive/refs/tags/${bwz_latest_rls}.tar.gz
