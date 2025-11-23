@@ -111,6 +111,7 @@ if test $build_rls == "true"; then
     mv verilator-${vlt_version} verilator-src
 else
     mv verilator verilator-src
+fi
 
 cd verilator-src
 autoconf
