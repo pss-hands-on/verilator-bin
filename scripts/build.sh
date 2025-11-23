@@ -2,6 +2,7 @@
 
 root=$(pwd)
 PATH_SAV=${PATH}
+build_rls=false
 
 
 if test $(uname -s) = "Linux"; then
@@ -37,11 +38,14 @@ if test ! -d py; then
     if test $? -ne 0; then exit 1; fi
 fi
 
-if test ! -f ${vlt_latest_rls}.tar.gz; then
-#    wget https://github.com/verilator/verilator/archive/refs/tags/${vlt_latest_rls}.tar.gz
+if test $build_rls == "true"; then
+    if test ! -f ${vlt_latest_rls}.tar.gz; then
+        wget https://github.com/verilator/verilator/archive/refs/tags/${vlt_latest_rls}.tar.gz
+        if test $? -ne 0; then exit 1; fi
+    fi
+else
     git clone https://github.com/verilator/verilator.git
     if test $? -ne 0; then exit 1; fi
-fi
 
 if test ! -f ${bwz_latest_rls}.tar.gz; then
     wget https://github.com/bitwuzla/bitwuzla/archive/refs/tags/${bwz_latest_rls}.tar.gz
@@ -95,14 +99,17 @@ if test $? -ne 0; then exit 1; fi
 #********************************************************************
 cd ${root}
 
-if test -d verilator-${vlt_version}; then
-    rm -rf verilator-${vlt_version}
-fi
+if test $build_rls == "true"; then
+    if test -d verilator-${vlt_version}; then
+        rm -rf verilator-${vlt_version}
+    fi
+ 
+    tar xvzf ${vlt_latest_rls}.tar.gz
+    if test $? -ne 0; then exit 1; fi
 
-tar xvzf ${vlt_latest_rls}.tar.gz
-if test $? -ne 0; then exit 1; fi
-
-mv verilator-${vlt_version} verilator-src
+    mv verilator-${vlt_version} verilator-src
+else
+    mv verilator verilator-src
 
 cd verilator-src
 autoconf
