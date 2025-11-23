@@ -6,7 +6,7 @@ PATH_SAV=${PATH}
 
 if test $(uname -s) = "Linux"; then
     yum update -y
-    yum install -y glibc-static wget flex bison jq help2man
+    yum install -y glibc-static wget flex bison jq help2man 
 
     if test -z $image; then
         image=linux
@@ -38,7 +38,8 @@ if test ! -d py; then
 fi
 
 if test ! -f ${vlt_latest_rls}.tar.gz; then
-    wget https://github.com/verilator/verilator/archive/refs/tags/${vlt_latest_rls}.tar.gz
+#    wget https://github.com/verilator/verilator/archive/refs/tags/${vlt_latest_rls}.tar.gz
+    git clone https://github.com/verilator/verilator.git
     if test $? -ne 0; then exit 1; fi
 fi
 
