@@ -123,7 +123,7 @@ jobs:
             body: |
               Build of Verilator ${{ needs.version-check.outputs.vlt_latest_rls }}
             draft: false
-            prerelease: false
+            prerelease: true
         - name: Download build artifacts
           uses: actions/download-artifact@v4
           with:
