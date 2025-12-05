@@ -23,32 +23,26 @@ jobs:
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 https://api.github.com/repos/bitwuzla/bitwuzla/releases/latest | \
                 jq ".tag_name" | sed -e 's/\"//g')
-            vlt_latest_rls=$(curl -s -L \
-                -H "Accept: application/vnd.github+json" \
+            
+            # Get Verilator version from configure.ac on master branch (top-of-trunk)
+            # The version is in AC_INIT([Verilator],[X.XXX ...], format
+            vlt_version=$(curl -s -L \
+                -H "Accept: application/vnd.github.raw+json" \
                 -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/verilator/verilator/git/refs/tags | \
-                jq ".[].ref" | sed -e's%refs/tags/%%' -e 's/\"//g'| sort | tail -n 1)
-            vlt_bin_latest_rls=$(curl -s -L \
-                -H "Accept: application/vnd.github+json" \
-                -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-                -H "X-GitHub-Api-Version: 2022-11-28" \
-                https://api.github.com/repos/pss-hands-on/verilator-bin/releases/latest | \
-                jq ".tag_name" | sed -e 's/\"//g')
+                https://api.github.com/repos/verilator/verilator/contents/configure.ac?ref=master | \
+                grep -E "^AC_INIT" | sed -E 's/AC_INIT\(\[Verilator\],\[([0-9]+\.[0-9]+).*/\1/')
+            
+            # Use master branch for top-of-trunk builds
+            vlt_latest_rls="master"
 
             echo "bwz_latest_rls: ${bwz_latest_rls}"
-            echo "vlt_bin_latest_rls: ${vlt_bin_latest_rls}"
+            echo "vlt_version: ${vlt_version}"
             echo "vlt_latest_rls: ${vlt_latest_rls}"
-            vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
-
-            #set -x
 
             echo "bwz_latest_rls=${bwz_latest_rls}" >> ${GITHUB_OUTPUT}
             echo "vlt_latest_rls=${vlt_latest_rls}" >> ${GITHUB_OUTPUT}
-            echo "vlt_version=${vlt_version}.${BUILD_NUM}" >> ${GITHUB_OUTPUT}
 
-
-            vlt_version=$(echo $vlt_latest_rls | sed -e 's/^v//')
             rls_version="${vlt_version}.${{ github.run_id }}"
             echo "rls_version=${rls_version}" >> ${GITHUB_OUTPUT}
 
@@ -118,10 +112,11 @@ jobs:
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
           with:
-            tag_name: "${{ needs.version-check.outputs.vlt_latest_rls }}.${{ github.run_id }}"
-            release_name: "Release ${{ needs.version-check.outputs.vlt_latest_rls }}.${{ github.run_id }}"
+            tag_name: "v${{ needs.version-check.outputs.rls_version }}"
+            release_name: "Release v${{ needs.version-check.outputs.rls_version }}"
             body: |
-              Build of Verilator ${{ needs.version-check.outputs.vlt_latest_rls }}
+              Build of Verilator from top-of-trunk (master branch)
+              Version: ${{ needs.version-check.outputs.rls_version }}
             draft: false
             prerelease: true
         - name: Download build artifacts
@@ -134,7 +129,7 @@ jobs:
         - name: Upload assets to release
           uses: softprops/action-gh-release@v2
           with:
-            tag_name: "${{ needs.version-check.outputs.vlt_latest_rls }}.${{ github.run_id }}"
+            tag_name: "v${{ needs.version-check.outputs.rls_version }}"
             files: |
               release/**/*.tar.gz
             fail_on_unmatched_files: true
