@@ -90,14 +90,12 @@ ExternalProject_Add(bitwuzla
 )
 
 # Build Verilator
-# Note: For macOS, we need to ensure FLEX and BISON are found from the environment
-# and force regeneration of lexer files by removing pregen files before build
 ExternalProject_Add(verilator
   DEPENDS bitwuzla
   GIT_REPOSITORY https://github.com/verilator/verilator.git
   GIT_TAG ${VERILATOR_GIT_TAG}
   CONFIGURE_COMMAND autoconf COMMAND <SOURCE_DIR>/configure --prefix=${CMAKE_INSTALL_PREFIX} --with-solver=bitwuzla
-  BUILD_COMMAND bash -c "rm -f src/obj*/*_pregen* 2>/dev/null; make -j${NPROC}"
+  BUILD_COMMAND make -j${NPROC}
   INSTALL_COMMAND make install
   BUILD_IN_SOURCE 1
 )

@@ -33,6 +33,9 @@ elif test $(uname -s) = "Darwin"; then
     # Install meson and ninja for bitwuzla build
     pip3 install meson ninja --break-system-packages || pip3 install meson ninja
     
+    # Set flag to remove pregen files on macOS to avoid flex compatibility issues
+    REMOVE_PREGEN=1
+    
     rls_plat=${image}
 elif test $(uname -s) = "Windows"; then
     rls_plat="windows-x64"
@@ -91,6 +94,13 @@ else
 fi
 
 if test $? -ne 0; then exit 1; fi
+
+# On macOS, remove pregen lex files to force regeneration with homebrew flex
+# This avoids compatibility issues with the system FlexLexer.h
+if test "x${REMOVE_PREGEN}" = "x1"; then
+    echo "Removing pregen lex files for macOS compatibility..."
+    find . -name "*_pregen*" -delete 2>/dev/null || true
+fi
 
 # Build
 make -j$(nproc)
