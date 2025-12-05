@@ -24,6 +24,16 @@ if test $(uname -s) = "Linux"; then
     fi
     
     rls_plat=${image}
+elif test $(uname -s) = "Darwin"; then
+    # macOS - dependencies installed via brew in CI
+    if test -z $image; then
+        image=macos-$(uname -m)
+    fi
+    
+    # Install meson and ninja for bitwuzla build
+    pip3 install meson ninja --break-system-packages || pip3 install meson ninja
+    
+    rls_plat=${image}
 elif test $(uname -s) = "Windows"; then
     rls_plat="windows-x64"
 fi
