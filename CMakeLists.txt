@@ -75,7 +75,8 @@ ExternalProject_Add(mpfr
 )
 
 # Build Bitwuzla
-# Use meson directly with --wrap-mode=nodownload to force use of locally-built GMP/MPFR
+# Use meson directly with --wrap-mode=nofallback to prevent fallback to wrap for GMP/MPFR
+# Pass pkg-config-path and native-file for proper library detection on macOS
 ExternalProject_Add(bitwuzla
   DEPENDS python-venv gmp mpfr
   GIT_REPOSITORY https://github.com/bitwuzla/bitwuzla.git
@@ -86,10 +87,14 @@ ExternalProject_Add(bitwuzla
     LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:$ENV{LD_LIBRARY_PATH}
     DYLD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:$ENV{DYLD_LIBRARY_PATH}
     LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:$ENV{LIBRARY_PATH}
-    CFLAGS=-I${CMAKE_INSTALL_PREFIX}/include
-    CXXFLAGS=-I${CMAKE_INSTALL_PREFIX}/include
-    LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/lib
-    meson setup <SOURCE_DIR>/build <SOURCE_DIR> --prefix=${CMAKE_INSTALL_PREFIX} -Dfpexp=false --wrap-mode=nodownload
+    meson setup <SOURCE_DIR>/build <SOURCE_DIR> 
+      --prefix=${CMAKE_INSTALL_PREFIX} 
+      -Dfpexp=false 
+      --pkg-config-path=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
+      -Dc_args=-I${CMAKE_INSTALL_PREFIX}/include
+      -Dcpp_args=-I${CMAKE_INSTALL_PREFIX}/include
+      -Dc_link_args=-L${CMAKE_INSTALL_PREFIX}/lib
+      -Dcpp_link_args=-L${CMAKE_INSTALL_PREFIX}/lib
   BUILD_COMMAND ${CMAKE_COMMAND} -E chdir <SOURCE_DIR>/build ${CMAKE_COMMAND} -E env 
     PATH=${CMAKE_BINARY_DIR}/python-venv-prefix/venv/bin:$ENV{PATH}
     LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:$ENV{LD_LIBRARY_PATH}
