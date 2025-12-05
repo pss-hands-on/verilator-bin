@@ -1,0 +1,8 @@
+
+# yaml-language-server: $schema=https://dv-flow.github.com/dv.flow.schema.json
+
+package:
+  name: org.edapack.verilator-bin.tests
+
+  tasks:
+  - name: sim-img
