@@ -15,6 +15,9 @@ if test $(uname -s) = "Linux"; then
     fi
     export PATH=/opt/python/cp312-cp312/bin:$PATH
     
+    # Install meson and ninja for bitwuzla build
+    pip3 install meson ninja
+    
     # Create cmake symlink if cmake3 exists
     if test -f /usr/bin/cmake3 && test ! -f /usr/bin/cmake; then
         ln -s /usr/bin/cmake3 /usr/bin/cmake
