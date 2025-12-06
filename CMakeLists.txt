@@ -91,6 +91,7 @@ ExternalProject_Add(bitwuzla
       --prefix=${CMAKE_INSTALL_PREFIX} 
       -Dfpexp=false 
       --wrap-mode=nodownload
+      --default-library=shared
       --pkg-config-path=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
       -Dc_args=-I${CMAKE_INSTALL_PREFIX}/include
       -Dcpp_args=-I${CMAKE_INSTALL_PREFIX}/include
