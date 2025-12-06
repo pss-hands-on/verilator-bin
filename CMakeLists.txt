@@ -90,7 +90,7 @@ ExternalProject_Add(bitwuzla
     meson setup <SOURCE_DIR>/build <SOURCE_DIR> 
       --prefix=${CMAKE_INSTALL_PREFIX} 
       -Dfpexp=false 
-      --wrap-mode=nodownload
+      --wrap-mode=nofallback
       --default-library=shared
       --pkg-config-path=${CMAKE_INSTALL_PREFIX}/lib/pkgconfig
       -Dc_args=-I${CMAKE_INSTALL_PREFIX}/include
